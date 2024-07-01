@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Put, Query, Req, Request, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { CreateAlmacenDto } from './dto/almacen.dto';
@@ -53,9 +53,9 @@ export class AppController {
   @Post('/almacen')  
   postAlmacen(
     @Body() dataAlamacen: CreateAlmacenDto,
-  ){
-    
-    return this.appService.postAlmacen(dataAlamacen)
+    @Request() req:any
+  ){    
+    return this.appService.postAlmacen(dataAlamacen,req)
   }
 
   @UseGuards(JwtAuthGuard)

@@ -123,9 +123,14 @@ export class AppService {
     }
   }  
 
-  async postAlmacen(dataAlmacen:CreateAlmacenDto){
+  async postAlmacen(dataAlmacen:CreateAlmacenDto,req:any){
     try{
-      console.log(dataAlmacen);
+      let user;
+      if (req.user){
+         user = req.user;
+      }   
+      const tipoNegocio = await this.getByIdTipoNegocio(parseInt(dataAlmacen.idTipoNegocio.toString()));
+      const subTipoNegocio = await this.getByIdSubTipoNegocio(parseInt(dataAlmacen.idSubTipoNegocio.toString()));
       const arrayContacto = dataAlmacen.contactos ? dataAlmacen.contactos: [];     
 
       const newDataAlmacen:CreateAlmacenDto={
@@ -143,6 +148,10 @@ export class AppService {
         telefono2:dataAlmacen.telefono2,
         razonSocial:dataAlmacen.razonSocial,
         valorAdministracion:parseFloat(dataAlmacen.valorAdministracion.toString()),
+        usuarioCrea: user ? user.username: 'JJ',
+        fechaCreacion: new Date(),
+        tipoNegocio:tipoNegocio.element.tipoNegocio,
+        subTipoNegocio:subTipoNegocio.element.subTipoNegocio
       }
 
       
@@ -164,7 +173,7 @@ export class AppService {
             telefono:contacto.telefono,
             celular:contacto.celular            
           }
-          const resultContacto = await this.postContactoAlmacen(dataContacto);
+          const resultContacto = await this.postContactoAlmacen(dataContacto,req);
          }
       }
       return result; // Opcional: podrías devolver algo específico después de crearlo, como el ID generado
@@ -176,7 +185,13 @@ export class AppService {
 
   async putAlmacen(dataAlmacen:CreateAlmacenDto,idAlmacen:number,req:any){
     try{
-      console.log(req.user);
+      let user;
+      if (req.user){
+         user = req.user;
+      }      
+
+      const tipoNegocio = await this.getByIdTipoNegocio(parseInt(dataAlmacen.idTipoNegocio.toString()));
+      const subTipoNegocio = await this.getByIdSubTipoNegocio(parseInt(dataAlmacen.idSubTipoNegocio.toString()));
       const arrayContacto = dataAlmacen.contactos ? dataAlmacen.contactos: [];     
       const almacen = await this.getByIdAlmacen(idAlmacen);
 
@@ -195,6 +210,10 @@ export class AppService {
         telefono2:dataAlmacen.telefono2,
         razonSocial:dataAlmacen.razonSocial,
         valorAdministracion:parseFloat(dataAlmacen.valorAdministracion.toString()),
+        usuarioModifica: user ? user.username: 'JJ',
+        fechaModifica: new Date(),
+        tipoNegocio:tipoNegocio.element.tipoNegocio,
+        subTipoNegocio:subTipoNegocio.element.subTipoNegocio
       }
 
       if (!almacen){
@@ -216,7 +235,7 @@ export class AppService {
            telefono:contacto.telefono,
            celular:contacto.celular            
          }
-          await this.putContactoAlmacen(dataContacto,contacto.idContactoAlmacen,result.idalmacen);
+          await this.putContactoAlmacen(dataContacto,contacto.idContactoAlmacen,result.idalmacen,req);
         }
      }
       return result; // Opcional: podrías devolver algo específico después de crearlo, como el ID generado
@@ -310,12 +329,16 @@ export class AppService {
     }
   }
 
-  async postContactoAlmacen(dataContactoAlmacen:contactoAlmacenDto){
+  async postContactoAlmacen(dataContactoAlmacen:contactoAlmacenDto,req:any){
     try{
-
-      console.log(dataContactoAlmacen);
+      let user;
+      if (req.user){
+         user = req.user;
+      } 
       const contactoAlmacen = new contactoAlmacenEntity();
       // Asigna los valores del DTO a la entidad Almacen
+      dataContactoAlmacen.fechaCreacion = new Date();
+      dataContactoAlmacen.usuarioCrea = user ? user.username : 'JJ';
       Object.assign(contactoAlmacen, dataContactoAlmacen);      
       const result = await this.contactoAlmacenRepository.save(contactoAlmacen);
       return result; // Opcional: podrías devolver algo específico después de crearlo, como el ID generado
@@ -325,17 +348,23 @@ export class AppService {
     }
   }
 
-  async putContactoAlmacen(dataContactoAlmacen:contactoAlmacenDto,idContactoAlmacen:number,idAlmacen:number){
+  async putContactoAlmacen(dataContactoAlmacen:contactoAlmacenDto,idContactoAlmacen:number,idAlmacen:number,req:any){
     try{
+      let user;
+      if (req.user){
+         user = req.user;
+      } 
       const getContactoAlmacen = await this.getByIdContactoAlmacen(idContactoAlmacen,idAlmacen);
       const contactoAlmacen = getContactoAlmacen.element;    
       if (!contactoAlmacen){        
         if (dataContactoAlmacen){
-          const result = await this.postContactoAlmacen(dataContactoAlmacen);
+          const result = await this.postContactoAlmacen(dataContactoAlmacen,req);
           return result;
         }
       }
       else{
+        dataContactoAlmacen.fechaModifica = new Date();
+        dataContactoAlmacen.usuarioModifica = user ? user.username : 'JJ';
         // Asigna los valores del DTO a la entidad Almacen
         Object.assign(contactoAlmacen, dataContactoAlmacen);      
         const result = await this.contactoAlmacenRepository.save(contactoAlmacen);
@@ -359,6 +388,23 @@ export class AppService {
       this.catchError(err);
     }
   }
+  
+  async getByIdTipoNegocio(idTipoNegocio:number){
+    try{
+      const result = await this.tipoNegocioRepository.findOne({
+        where:{
+          idTipoNegocio:idTipoNegocio
+        }
+      })
+
+      return {
+        element:result
+      }
+    }
+    catch(err){
+      this.catchError(err);
+    }
+  }
 
   async getSubTipoNegocio(idTipoNegocio:number){
     try{
@@ -375,6 +421,23 @@ export class AppService {
     }
     catch(err){
       this.catchError(err);
+    }
+  }
+
+  async getByIdSubTipoNegocio(idSubTipoNegocio:number){
+    try{
+      const result = await this.subTipoNegocioRepository.findOne({
+        where:{
+          idSubTipoNegocio:idSubTipoNegocio
+        }
+      });
+
+      return {
+        element:result
+      }
+    }
+    catch(err){
+      this.catchError(err)
     }
   }
 

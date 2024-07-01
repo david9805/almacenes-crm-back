@@ -198,9 +198,9 @@ export class CreateAlmacenDto {
   @IsOptional()
   zonaInterna?: string;
 
-  @IsString()
+  @IsDateString()
   @IsOptional()
-  fechaCreacion?: string;
+  fechaCreacion?: Date;
 
   @IsString()
   @IsOptional()

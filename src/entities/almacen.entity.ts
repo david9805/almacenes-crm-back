@@ -150,7 +150,7 @@ import { contactoAlmacenEntity } from './contactoAlmacen.entity';
     @Column({ name: 'ZONAINTERNA', type: 'varchar', length:50, nullable: true })
     zonaInterna: string;
 
-    @Column({ name: 'FECHACREACION', type: 'varchar', length:50, nullable: true })
+    @Column({ name: 'FECHACREACION', type: 'datetime', nullable: true })
     fechaCreacion: string;
 
     @Column({ name: 'USUARIOCREA', type: 'varchar', length:50, nullable: true })
