@@ -39,7 +39,7 @@ import { subTipoNegocioEntity } from './entities/subTipoNegocio.entity';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_KEY,  // Cambia esto a tu clave secreta
-      signOptions: { expiresIn: '30m' }, // Ajusta el tiempo de expiración según tus necesidades
+      signOptions: { expiresIn: '60m' }, // Ajusta el tiempo de expiración según tus necesidades
     }),
   ],
   controllers: [AppController],
