@@ -11,6 +11,7 @@ import { AlmacenEntity } from './entities/almacen.entity';
 import { contactoAlmacenEntity } from './entities/contactoAlmacen.entity';
 import { tipoNegocioEntity } from './entities/tipoNegocio.entity';
 import { subTipoNegocioEntity } from './entities/subTipoNegocio.entity';
+import { propietarioEntity } from './entities/propietario.entity';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { subTipoNegocioEntity } from './entities/subTipoNegocio.entity';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        entities: [UserEntity,AlmacenEntity,contactoAlmacenEntity,tipoNegocioEntity,subTipoNegocioEntity],
+        entities: [UserEntity,AlmacenEntity,contactoAlmacenEntity,tipoNegocioEntity,subTipoNegocioEntity,propietarioEntity],
         options: {
           encrypt: true, // habilitar SSL
           trustServerCertificate: true, // confiar en el certificado autofirmado
@@ -35,7 +36,7 @@ import { subTipoNegocioEntity } from './entities/subTipoNegocio.entity';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([UserEntity,AlmacenEntity,contactoAlmacenEntity,tipoNegocioEntity,subTipoNegocioEntity]),
+    TypeOrmModule.forFeature([UserEntity,AlmacenEntity,contactoAlmacenEntity,tipoNegocioEntity,subTipoNegocioEntity,propietarioEntity]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_KEY,  // Cambia esto a tu clave secreta

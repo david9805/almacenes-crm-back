@@ -8,7 +8,7 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
 
-  @UseGuards(JwtAuthGuard)
+
   @Get('/user')
   findAllUser(){
     return this.appService.findAllUser();
@@ -118,5 +118,17 @@ export class AppController {
     @Param('idTipoNegocio') idTipoNegocio:number
   ){
     return this.appService.getSubTipoNegocio(idTipoNegocio);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/propietario/:idAlmacen')
+  getPropietario(
+    @Param('idAlmacen') idAlmacen:number,
+    @Query('name') name:string,
+    @Query('page') page:number,
+    @Query('pageElements') pageElements:number,
+    @Query('all') all:string
+  ){
+    return this.appService.getPropietario(name,page,pageElements,idAlmacen,all)
   }
 }

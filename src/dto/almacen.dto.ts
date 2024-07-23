@@ -233,4 +233,9 @@ export class CreateAlmacenDto {
   @IsArray()
   @IsOptional()
   contactos?:any[];
+
+  @IsArray()
+  @IsOptional()
+  propietarios?:any[];
+
 }

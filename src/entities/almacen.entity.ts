@@ -151,7 +151,7 @@ import { contactoAlmacenEntity } from './contactoAlmacen.entity';
     zonaInterna: string;
 
     @Column({ name: 'FECHACREACION', type: 'datetime', nullable: true })
-    fechaCreacion: string;
+    fechaCreacion: Date;
 
     @Column({ name: 'USUARIOCREA', type: 'varchar', length:50, nullable: true })
     usuarioCrea: string;

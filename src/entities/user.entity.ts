@@ -16,6 +16,24 @@ export class UserEntity {
   
     @Column({ name: 'ESTADO', type: 'varchar', length: 10, nullable: true })
     estado: string;
+
+    @Column({name:'VISUALIZARALMACEN',type:'varchar',length:1,nullable:true})
+    visualizarAlmacen:string;
+
+    @Column({name:'MODIFICARPROPIETARIO',type:'varchar',length:1,nullable:true})
+    modificarPropietario:string;
+
+    @Column({name:'MODIFICARCONTACTO',type:'varchar',length:1,nullable:true})
+    modificarContacto:string;
+
+    @Column({name:'MODIFICAALMACEN',type:'varchar',length:1,nullable:true})
+    modificaAlmacen:string;
+
+    @Column({name:'VISUALIZARPROPIETARIO',type:'varchar',length:1,nullable:true})
+    visualizarPropietario:string;
+
+    @Column({name:'VISUALIZARCONTACTO',type:'varchar',length:1,nullable:true})
+    visualizarContacto:string;
   
     // Agrega las demás columnas aquí...
   }

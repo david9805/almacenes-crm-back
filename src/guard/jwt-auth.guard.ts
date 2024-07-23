@@ -11,13 +11,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     
     handleRequest(err, user, info) {
     if (err || !user) {
-        console.log(info);
         if (info instanceof TokenExpiredError) {
         throw new UnauthorizedException('Token has expired');
         }
 
         throw err || new UnauthorizedException('Unauthorized access');
     }
-    return user;
+        return user;
     }
 }

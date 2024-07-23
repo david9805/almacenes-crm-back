@@ -9,6 +9,8 @@ import { contactoAlmacenDto } from './dto/contactoAlmacen.dto';
 import { contactoAlmacenEntity } from './entities/contactoAlmacen.entity';
 import { tipoNegocioEntity } from './entities/tipoNegocio.entity';
 import { subTipoNegocioEntity } from './entities/subTipoNegocio.entity';
+import { propietarioEntity } from './entities/propietario.entity';
+import { propietarioDto } from './dto/propietario.dto';
 
 @Injectable()
 export class AppService {
@@ -24,6 +26,8 @@ export class AppService {
     private readonly tipoNegocioRepository: Repository<tipoNegocioEntity>,
     @InjectRepository(subTipoNegocioEntity)
     private readonly subTipoNegocioRepository: Repository<subTipoNegocioEntity>,
+    @InjectRepository(propietarioEntity)
+    private readonly propietarioRepository: Repository<propietarioEntity>,
     private readonly jwtService:JwtService,
   ){
 
@@ -131,7 +135,8 @@ export class AppService {
       }   
       const tipoNegocio = await this.getByIdTipoNegocio(parseInt(dataAlmacen.idTipoNegocio.toString()));
       const subTipoNegocio = await this.getByIdSubTipoNegocio(parseInt(dataAlmacen.idSubTipoNegocio.toString()));
-      const arrayContacto = dataAlmacen.contactos ? dataAlmacen.contactos: [];     
+      const arrayContacto = dataAlmacen.contactos ? dataAlmacen.contactos: []; 
+      const arrayPropietario = dataAlmacen.propietarios ? dataAlmacen.propietarios:[] ;
 
       const newDataAlmacen:CreateAlmacenDto={
         idTipoNegocio:parseInt(dataAlmacen.idTipoNegocio.toString()),
@@ -148,16 +153,19 @@ export class AppService {
         telefono2:dataAlmacen.telefono2,
         razonSocial:dataAlmacen.razonSocial,
         valorAdministracion:parseFloat(dataAlmacen.valorAdministracion.toString()),
-        usuarioCrea: user ? user.username: 'JJ',
+        usuarioCrea: dataAlmacen.usuarioCrea,
         fechaCreacion: new Date(),
         tipoNegocio:tipoNegocio.element.tipoNegocio,
         subTipoNegocio:subTipoNegocio.element.subTipoNegocio
       }
 
       
-      const almacen = new AlmacenEntity();
+      const almacen = new AlmacenEntity();      
       // Asigna los valores del DTO a la entidad Almacen
       Object.assign(almacen, newDataAlmacen);      
+
+      console.log(almacen);
+
       const result = await this.almacenRepository.save(almacen);
       console.log(result,arrayContacto);      
       if (arrayContacto){
@@ -171,10 +179,30 @@ export class AppService {
             cargo:contacto.cargo,
             email:contacto.email,
             telefono:contacto.telefono,
-            celular:contacto.celular            
+            celular:contacto.celular,
+            usuarioCrea:contacto.usuarioCrea           
           }
           const resultContacto = await this.postContactoAlmacen(dataContacto,req);
          }
+      }
+
+      if (arrayPropietario){
+        for(const propietario of arrayPropietario){
+          const dataPropietario:propietarioDto={
+            idAlmacen:result.idalmacen,
+            almacen:result.almacen,
+            local:result.local,
+            nombres:propietario.nombres,
+            apellidos:propietario.apellidos,
+            cargo:propietario.cargo,
+            email:propietario.email,
+            telefono:propietario.telefono,
+            celular:propietario.celular,
+            usuarioCrea:propietario.usuarioCrea   
+          }
+
+          const resultPropietario = await this.postPropietario(dataPropietario)
+        }
       }
       return result; // Opcional: podrías devolver algo específico después de crearlo, como el ID generado
     }
@@ -193,6 +221,7 @@ export class AppService {
       const tipoNegocio = await this.getByIdTipoNegocio(parseInt(dataAlmacen.idTipoNegocio.toString()));
       const subTipoNegocio = await this.getByIdSubTipoNegocio(parseInt(dataAlmacen.idSubTipoNegocio.toString()));
       const arrayContacto = dataAlmacen.contactos ? dataAlmacen.contactos: [];     
+      const arrayPropietario = dataAlmacen.propietarios ? dataAlmacen.propietarios: [];     
       const almacen = await this.getByIdAlmacen(idAlmacen);
 
       const edtiDataAlmacen:CreateAlmacenDto={
@@ -210,7 +239,7 @@ export class AppService {
         telefono2:dataAlmacen.telefono2,
         razonSocial:dataAlmacen.razonSocial,
         valorAdministracion:parseFloat(dataAlmacen.valorAdministracion.toString()),
-        usuarioModifica: user ? user.username: 'JJ',
+        usuarioModifica: dataAlmacen.usuarioCrea,
         fechaModifica: new Date(),
         tipoNegocio:tipoNegocio.element.tipoNegocio,
         subTipoNegocio:subTipoNegocio.element.subTipoNegocio
@@ -233,10 +262,28 @@ export class AppService {
            cargo:contacto.cargo,
            email:contacto.email,
            telefono:contacto.telefono,
-           celular:contacto.celular            
+           celular:contacto.celular,
+           usuarioCrea:contacto.usuarioCrea          
          }
           await this.putContactoAlmacen(dataContacto,contacto.idContactoAlmacen,result.idalmacen,req);
         }
+     }
+     if (arrayPropietario){
+      for (const propietario of arrayPropietario){
+        const dataPropietario:propietarioDto={
+          idAlmacen:result.idalmacen,
+           almacen:result.almacen,
+           local:result.local,
+           nombres:propietario.nombres,
+           apellidos:propietario.apellidos,
+           cargo:propietario.cargo,
+           email:propietario.email,
+           telefono:propietario.telefono,
+           celular:propietario.celular,
+           usuarioCrea:propietario.usuarioCrea  
+        }
+        await this.putPropietario(dataPropietario,propietario.idPropietario)        
+      }
      }
       return result; // Opcional: podrías devolver algo específico después de crearlo, como el ID generado
     }
@@ -338,7 +385,6 @@ export class AppService {
       const contactoAlmacen = new contactoAlmacenEntity();
       // Asigna los valores del DTO a la entidad Almacen
       dataContactoAlmacen.fechaCreacion = new Date();
-      dataContactoAlmacen.usuarioCrea = user ? user.username : 'JJ';
       Object.assign(contactoAlmacen, dataContactoAlmacen);      
       const result = await this.contactoAlmacenRepository.save(contactoAlmacen);
       return result; // Opcional: podrías devolver algo específico después de crearlo, como el ID generado
@@ -364,7 +410,8 @@ export class AppService {
       }
       else{
         dataContactoAlmacen.fechaModifica = new Date();
-        dataContactoAlmacen.usuarioModifica = user ? user.username : 'JJ';
+        dataContactoAlmacen.usuarioModifica = dataContactoAlmacen.usuarioCrea;
+        dataContactoAlmacen.usuarioCrea = contactoAlmacen.usuarioCrea;        
         // Asigna los valores del DTO a la entidad Almacen
         Object.assign(contactoAlmacen, dataContactoAlmacen);      
         const result = await this.contactoAlmacenRepository.save(contactoAlmacen);
@@ -449,13 +496,130 @@ export class AppService {
         const access_token = this.jwtService.sign(payload);
         return {
           access_token:access_token,
-          username: user.nombreCompleto,
-          idUsuario:user.idUsuario
+          user:user
         }
       }   
     }
-    catch(err){
-      this.catchError(err);
+    catch(error){
+      this.catchError(error);
+    }
+  }
+
+  async getPropietario(name:string,page:number,pageElements:number,idalmacen:number,all:any){
+    try{
+
+      const where:any = {};
+
+      if (name){
+        where.nombre = Like(`${name}`)
+      }
+
+      if (!page){
+        page = 1
+      }
+
+      if(!pageElements){
+        pageElements = 8
+      }
+
+      if(idalmacen){
+        where.idAlmacen = idalmacen
+      }
+      let data,count;
+      if (!all){
+        [data,count] = await this.propietarioRepository.findAndCount(
+          {
+            where:where,
+            skip:(page-1)*pageElements,
+            take:pageElements
+          }
+        )
+      }
+      else{
+        [data,count] = await this.propietarioRepository.findAndCount(
+          {
+            where:{
+              idAlmacen:idalmacen
+            }
+          }
+        )
+      }
+       
+
+      return {
+        element:data,
+        count:count
+      }
+    }
+    catch(error){
+      this.catchError(error)
+    }
+  }
+
+  async getByIdPropietario(idAlmacen:number,idPropietario:number){
+    try{
+      const result = await this.propietarioRepository.findOne({
+        where:{
+          idAlmacen:idAlmacen,
+          idPropietario:idPropietario
+        }
+      })
+
+      return {
+        element:result
+      }
+    }
+    catch(error){
+      this.catchError(error)
+    }
+  }
+
+  async postPropietario(dataPropietario:propietarioDto){
+    try{
+      const propietario = new propietarioEntity();
+
+      dataPropietario.fechaCreacion = new Date();
+
+      Object.assign(propietario,dataPropietario)
+
+      const result = await this.propietarioRepository.save(propietario);
+
+      return{
+        element:result
+      }
+    }
+    catch(error){
+      this.catchError(error)
+    }
+  }
+
+  async putPropietario(dataPropietario:propietarioDto,idPropietario:number){
+    try{
+      const getPropietario = await this.getByIdPropietario(dataPropietario.idAlmacen,idPropietario);
+      const propietario = getPropietario.element;      
+      if(!propietario){
+        const result = await this.postPropietario(dataPropietario);
+        return {
+          element:result
+        }
+      }
+      else{        
+        
+        dataPropietario.fechaModifica = new Date();
+        dataPropietario.usuarioModifica = dataPropietario.usuarioCrea;
+        dataPropietario.usuarioCrea = propietario.usuarioCrea;
+        
+        Object.assign(propietario,dataPropietario);
+        console.log(propietario,dataPropietario)
+        const result = await  this.propietarioRepository.save(propietario);
+
+        return {
+          element:result
+        }        
+      }
+    }
+    catch(error){
+      this.catchError(error);
     }
   }
 
